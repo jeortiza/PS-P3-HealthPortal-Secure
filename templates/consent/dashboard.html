@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Mis Accesos Médicos Activos</h2>
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Doctor Autorizado</th>
+                        <th>Fecha de Expiración</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for access in active_accesses %}
+                    <tr>
+                        <td>{{ access.doctor.username }}</td>
+                        <td>{{ access.expires_at|date:"d M Y, H:i" }}</td>
+                        <td>
+                            <form action="{% url 'revoke_access' access.id %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">Revocar Acceso</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">No tienes accesos médicos activos en este momento.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

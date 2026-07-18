@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Mensaje visual de seguridad -->
+    <div class="alert alert-success">
+        🔒 <strong>Acceso ABAC Verificado:</strong> Tienes el consentimiento activo del paciente para ver su información médica sensible.
+    </div>
+
+    <h2 class="mb-4">Historia Clínica Protegida</h2>
+    
+    <!-- Tarjeta de datos del paciente -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-dark text-white">
+            Datos Personales del Paciente
+        </div>
+        <div class="card-body">
+            <p><strong>DNI:</strong> {{ patient.dni }}</p>
+            <p><strong>Teléfono:</strong> {{ patient.telefono }}</p>
+            <p><strong>Fecha de Nacimiento:</strong> {{ patient.fecha_nacimiento }}</p>
+        </div>
+    </div>
+
+    <h3 class="mb-3">Registros de Atención Médica</h3>
+    
+    <!-- Lista de registros médicos -->
+    {% if records %}
+        <div class="row">
+            {% for record in records %}
+            <div class="col-md-12 mb-3">
+                <div class="card border-primary">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Diagnóstico: {{ record.diagnostico }}</h5>
+                        <hr>
+                        <p class="card-text"><strong>Medicamentos recetados:</strong><br> {{ record.medicamentos }}</p>
+                        <p class="card-text"><strong>Notas clínicas del doctor:</strong><br> {{ record.notas }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            Este paciente aún no tiene registros médicos en su historial.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
