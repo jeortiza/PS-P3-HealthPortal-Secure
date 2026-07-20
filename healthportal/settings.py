@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
+import os
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,6 +25,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-!^v-ll2--*!i)%hr@#z(#%&$ah_yr5q4k3e=&&rj(c!vqm*c3b'
+
+# ==============================================================================
+# INTEGRACIÓN CON AZURE KEY VAULT (SEMANA 6)
+# ==============================================================================
+KEY_VAULT_NAME = os.environ.get("KEY_VAULT_NAME")
+
+if KEY_VAULT_NAME:
+    KV_URI = f"https://{KEY_VAULT_NAME}.vault.azure.net"
+    credential = DefaultAzureCredential()
+    client = SecretClient(vault_url=KV_URI, credential=credential)
+
+    try:
+        PHI_MASTER_KEY = client.get_secret("PHI-MASTER-KEY").value
+    except Exception as e:
+        print(f"Alerta Key Vault: {e}")
+        PHI_MASTER_KEY = os.environ.get("PHI_MASTER_KEY")
+else:
+    PHI_MASTER_KEY = os.environ.get("PHI_MASTER_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -160,3 +182,21 @@ CSP_DEFAULT_SRC = ("'self'",)
 CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")  # Permite estilos básicos
 CSP_SCRIPT_SRC = ("'self'",)
 CSP_IMG_SRC = ("'self'", "data:")              # Vital para mostrar el código QR (Base64)
+
+# ==============================================================================
+# CONFIGURACIÓN DE SEGURIDAD PARA PRODUCCIÓN (SEMANA 6 - AZURE)
+# ==============================================================================
+
+# 1. Forzar redirección a HTTPS (Obligatorio en producción)
+SECURE_SSL_REDIRECT = True
+
+# 2. Configuración estricta de HSTS (HTTP Strict Transport Security)
+SECURE_HSTS_SECONDS = 31536000  # 1 año de memoria para el navegador
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# 3. Hosts permitidos (Dominio oficial + entornos locales de prueba)
+ALLOWED_HOSTS = ['health.uqaisolutions.com.pe', 'localhost', '127.0.0.1']
+
+# 4. Orígenes confiables para CSRF (Evita bloqueos en formularios a través de HTTPS)
+CSRF_TRUSTED_ORIGINS = ['https://health.uqaisolutions.com.pe']
